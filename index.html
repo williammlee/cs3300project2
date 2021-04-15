@@ -1,0 +1,46 @@
+<html>
+
+<head>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <style>
+    .state {
+      fill: none;
+    }
+  </style>
+</head>
+
+<body>
+  <p>
+    <svg id="choropleth" height="800" width="800" style="margin:20px"></svg>
+    <script>
+
+      const svg = d3.select("#choropleth");
+      const width = svg.attr("width");
+      const height = svg.attr("height");
+      const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+      const mapWidth = width - margin.left - margin.right;
+      const mapHeight = height - margin.top - margin.bottom;
+      const map = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      const requestData = async function () {
+
+        const dev = await d3.csv("vg_dev.csv");
+        const sales = await d3.csv("vg_sales.csv");
+
+        console.log(dev)
+        console.log(sales)
+
+
+
+      };
+
+      requestData();
+
+    </script>
+  </p>
+
+</body>
+
+</html>
