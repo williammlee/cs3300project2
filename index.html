@@ -7,12 +7,70 @@
     .state {
       fill: none;
     }
+
+    .container{
+      background-color: #120458;
+    }
+
+    .devlist{
+      overflow: auto;
+    }
+
+    .devlist::-webkit-scrollbar{
+      background-color: #005678;
+    }
+
+    .devlist::-webkit-scrollbar-thumb{
+      background-color: #65dc98;
+    }
+
+    .devlist li {
+      list-style-type: "\1F579";
+      font-family: 'Courier New', monospace;
+      font-weight: bolder;
+      color: #65dc98;
+    }
+
+    .gamelist{
+      overflow: auto;
+    }
+
+    .gamelist::-webkit-scrollbar{
+      background-color: #005678;
+    }
+
+    .gamelist::-webkit-scrollbar-thumb{
+      background-color: #65dc98;
+    }
+
+    .gamelist li {
+      list-style-type: "\1F3AE";
+      font-family: 'Courier New', monospace;
+      font-weight: bolder;
+      color: #65dc98;
+    }
+
+
   </style>
 </head>
 
 <body>
-  <p>
-    <svg id="choropleth" height="800" width="800" style="margin:20px"></svg>
+    <div class = "container" style="display:flex">
+
+      <div style="height: 800px; width: 1000px;">
+        <svg id="choropleth" height="800" width="1000" style="margin:20px"></svg>
+      </div>
+    
+      <div id="devlist" class= "devlist" style="height: 800px; width: 200px; flex-grow:1">
+        
+      </div>
+      
+      <div id="gamelist" class = "gamelist" style="height: 800px; width: 200px; flex-grow:1">
+        
+      </div>
+    
+    </div>
+      
     <script>
 
       const svg = d3.select("#choropleth");
@@ -24,22 +82,67 @@
       const map = svg.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
+      const devlist = d3.select("#devlist")
+      const developers = devlist.append("ul")   
+
+      const gamelist = d3.select("#gamelist")
+      const games = gamelist.append("ul").attr("id", "games")
+                        
+
       const requestData = async function () {
 
         const dev = await d3.csv("vg_dev.csv");
         const sales = await d3.csv("vg_sales.csv");
 
-        console.log(dev)
-        console.log(sales)
+        //TODO:Modify this to only display the devlopers that match country chosen
+        dev.forEach(d => {
+          developers.append('li')
+                    .append('span')
+                    .attr('id', d.Developer)
+                    .text(d.Developer)
+                    .on("click", function(){
+                      document.getElementById('games').innerHTML = "";
+                      let element = d3.select(this);
+                      let result = sales.filter(pub => pub.Publisher === element.attr('id'));
+                      if (result.length === 0){
+                        games.append('text')
+                             .text("No Data Available :(")
+                             .style("font-family", "Courier New, monospace")
+                             .style("font-weight", "bolder")
+                             .style("color", "#65dc98")
+                             .style("text-align", "center")
+                      } else {
+                       
+                        result.forEach(pub => {
+                          
+                          games.append('li')
+                              .append('span')
+                              .attr('id', pub.Name)
+                              .text(pub.Name)
+                              .style('margin-left', 5)
+                          
+                          //TODO:add an on click feature to show the barcharts of game sales
+                          
+                        })
+                      }
+                      
+
+                    })
 
 
+        });
+
+        
+   
+        
 
       };
 
       requestData();
 
     </script>
-  </p>
+ 
 
 </body>
 
