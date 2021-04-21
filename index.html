@@ -132,7 +132,34 @@
         })
       });
 
-      console.log(countries)
+      let devCounts = {};
+
+      dev.forEach(row => {
+        if (devCounts[row.Country]) {
+          devCounts[row.Country] += 1;
+        }
+        else {
+          devCounts[row.Country] = 1;
+        }
+      });
+      console.log(devCounts)
+
+
+      count = []
+      for (var key in devCounts) {
+        count.push(devCounts[key])
+      }
+      console.log(count)
+
+
+      var divergentScale = [
+        "rgb(222, 222, 222)", "rgb(124, 159, 224)", "rgb(4, 12, 80)"]
+
+
+
+      const colorScale = d3.scaleQuantile()
+        .domain(count)
+        .range(divergentScale)
 
       svg.selectAll("path")
         .data(countries)
@@ -142,21 +169,22 @@
         .attr("stroke-width", 1)
         .attr("fill", "white")
         .attr("d", path)
+        .style("fill", d => colorScale(devCounts[d.name]))
         .on("mouseover", function (d, i) {
           d3.select(this).attr("fill", "grey").attr("stroke-width", 2);
-          return tooltip.style("hidden", false).html(i.name);
+          return tooltip.style("hidden", false).html(filter_dev(i.name));
         })
-        // .on("mousemove", function (d) {
-        //   console.log(d)
-        //   tooltip.classed("hidden", false)
-        //     .style("top", (- d.screenX + 10) + "px")
-        //     .style("left", (- d.screenY + 10) + "px")
-        //     .html(d.name);
-        // })
         .on("mouseout", function (d, i) {
           d3.select(this).attr("fill", "white").attr("stroke-width", 1);
           tooltip.classed("hidden", true);
         });
+
+      function filter_dev(country_name) {
+        dev1 = dev.filter(x => x.Country == country_name)
+        res = dev1.map(x => x.Developer)
+        console.log(res)
+        return res
+      }
 
 
 
