@@ -4,6 +4,26 @@
   <script src="https://d3js.org/d3.v6.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <style>
+    svg {
+      position: center;
+      background-color: #80d7ec;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .tooltip {
+      color: #222;
+      background: #fff;
+      border-radius: 3px;
+      box-shadow: 0px 0px 2px 0px #a6a6a6;
+      padding: .2em;
+      text-shadow: #f5f5f5 0 1px 0;
+      opacity: 0.9;
+      position: absolute;
+    }
+
     .state {
       fill: none;
     }
@@ -53,117 +73,140 @@
 </head>
 
 <body>
-  <<<<<<< HEAD <p>
-    <svg id="choropleth" height="800" width="1000" style="margin:20px"></svg>
-    =======
-    <div class="container" style="display:flex">
+  <p>
+    <svg id="choropleth" height="700" width="1000" style="margin:20px"></svg>
 
-      <div style="height: 800px; width: 1000px;">
-        <svg id="choropleth" height="800" width="1000" style="margin:20px"></svg>
-      </div>
+  <div class="tooltip" style="display:flex">
 
-      <div id="devlist" class="devlist" style="height: 800px; width: 200px; flex-grow:1">
-
-      </div>
-
-      <div id="gamelist" class="gamelist" style="height: 800px; width: 200px; flex-grow:1">
-
-      </div>
+    <div id="devlist" class="devlist" style="height: 800px; width: 200px; flex-grow:1">
 
     </div>
 
-    >>>>>>> dc9ffa8f7d193b630927839c9b7d5772b3c816f7
-    <script>
+    <div id="gamelist" class="gamelist" style="height: 800px; width: 200px; flex-grow:1">
 
-      const svg = d3.select("#choropleth");
-      const width = svg.attr("width");
-      const height = svg.attr("height");
-      const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-      const mapWidth = width - margin.left - margin.right;
-      const mapHeight = height - margin.top - margin.bottom;
-      const map = svg.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    </div>
 
-      const projection = d3.geoNaturalEarth1();
-      const pathGenerator = d3.geoPath().projection(projection);
+  </div>
 
-      svg.append('path')
-        .attr('class', 'sphere')
-        .attr('d', pathGenerator({ type: 'Sphere' }));
+  <script>
 
+    const svg = d3.select("#choropleth");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+    const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+    const mapWidth = width - margin.left - margin.right;
+    const mapHeight = height - margin.top - margin.bottom;
+    const map = svg.append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.json('https://unpkg.com/world-atlas@1.1.4/world/110m.json')
-        .then(data => {
+    const devlist = d3.select("#devlist")
+    const developers = devlist.append("ul")
 
-          const countries = topojson.feature(data, data.objects.countries);
-
-          svg.selectAll('path').data(countries.features)
-            .enter().append('path')
-            .attr('class', 'country')
-            .attr('d', pathGenerator)
-            .attr("fill", "white");
-        });
+    const gamelist = d3.select("#gamelist")
+    const games = gamelist.append("ul").attr("id", "games")
 
 
-      const devlist = d3.select("#devlist")
-      const developers = devlist.append("ul")
+    const requestData = async function () {
 
-      const gamelist = d3.select("#gamelist")
-      const games = gamelist.append("ul").attr("id", "games")
+      const dev = await d3.csv("vg_dev.csv");
+      const sales = await d3.csv("vg_sales.csv");
+      const names = await d3.csv("world-country-names.csv");
+      const world = await d3.json('https://unpkg.com/world-atlas@1.1.4/world/110m.json');
 
+      var projection = d3.geoNaturalEarth1()
+        .center([0, 15])
+        .rotate([-9, 0])
+        .scale([1300 / (2 * Math.PI)])
+        .translate([450, 300]);
 
-      const requestData = async function () {
+      var path = d3.geoPath()
+        .projection(projection);
 
-        const dev = await d3.csv("vg_dev.csv");
-        const sales = await d3.csv("vg_sales.csv");
+      var tooltip = d3.select("div.tooltip");
 
-        //TODO:Modify this to only display the devlopers that match country chosen
-        dev.forEach(d => {
-          developers.append('li')
-            .append('span')
-            .attr('id', d.Developer)
-            .text(d.Developer)
-            .on("click", function () {
-              document.getElementById('games').innerHTML = "";
-              let element = d3.select(this);
-              let result = sales.filter(pub => pub.Publisher === element.attr('id'));
-              if (result.length === 0) {
-                games.append('text')
-                  .text("No Data Available :(")
-                  .style("font-family", "Courier New, monospace")
-                  .style("font-weight", "bolder")
-                  .style("color", "#65dc98")
-                  .style("text-align", "center")
-              } else {
+      var countries1 = topojson.feature(world, world.objects.countries).features;
 
-                result.forEach(pub => {
+      countries = countries1.filter(function (d) {
+        return names.some(function (n) {
+          if (d.id == n.id) return d.name = n.name;
+        })
+      });
 
-                  games.append('li')
-                    .append('span')
-                    .attr('id', pub.Name)
-                    .text(pub.Name)
-                    .style('margin-left', 5)
+      console.log(countries)
 
-                  //TODO:add an on click feature to show the barcharts of game sales
-
-                })
-              }
-
-
-            })
-
-
+      svg.selectAll("path")
+        .data(countries)
+        .enter()
+        .append("path")
+        .attr("stroke", "green")
+        .attr("stroke-width", 1)
+        .attr("fill", "white")
+        .attr("d", path)
+        .on("mouseover", function (d, i) {
+          d3.select(this).attr("fill", "grey").attr("stroke-width", 2);
+          return tooltip.style("hidden", false).html(i.name);
+        })
+        // .on("mousemove", function (d) {
+        //   console.log(d)
+        //   tooltip.classed("hidden", false)
+        //     .style("top", (- d.screenX + 10) + "px")
+        //     .style("left", (- d.screenY + 10) + "px")
+        //     .html(d.name);
+        // })
+        .on("mouseout", function (d, i) {
+          d3.select(this).attr("fill", "white").attr("stroke-width", 1);
+          tooltip.classed("hidden", true);
         });
 
 
 
+      //TODO:Modify this to only display the devlopers that match country chosen
+      dev.forEach(d => {
+        developers.append('li')
+          .append('span')
+          .attr('id', d.Developer)
+          .text(d.Developer)
+          .on("click", function () {
+            document.getElementById('games').innerHTML = "";
+            let element = d3.select(this);
+            let result = sales.filter(pub => pub.Publisher === element.attr('id'));
+            if (result.length === 0) {
+              games.append('text')
+                .text("No Data Available :(")
+                .style("font-family", "Courier New, monospace")
+                .style("font-weight", "bolder")
+                .style("color", "#65dc98")
+                .style("text-align", "center")
+            } else {
+
+              result.forEach(pub => {
+
+                games.append('li')
+                  .append('span')
+                  .attr('id', pub.Name)
+                  .text(pub.Name)
+                  .style('margin-left', 5)
+
+                //TODO:add an on click feature to show the barcharts of game sales
+
+              })
+            }
 
 
-      };
+          })
 
-      requestData();
 
-    </script>
+      });
+
+
+
+
+
+    };
+
+    requestData();
+
+  </script>
 
 
 </body>
