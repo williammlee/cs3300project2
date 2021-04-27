@@ -88,6 +88,9 @@
 
   </div>
 
+  <div id='barchart' class='barchart' style="height: 400px; width: 200px; flex-grow:1">
+  </div>
+
   <script>
 
     const svg = d3.select("#choropleth");
@@ -105,6 +108,16 @@
     const gamelist = d3.select("#gamelist")
     const games = gamelist.append("ul").attr("id", "games")
 
+    const barchart = d3.select('#barchart')
+    const barWidth = barchart.attr("width");
+    const barHeight = barchart.attr("height");
+    const barMargins = { top: 20, right: 20, bottom: 20, left: 20};
+    const chartWidth = barWidth - barMargins.left - barMargins.right;
+    const chartHeight = barHeight - barMargins.top - barMargins.bottom;
+
+    let annotations = barchart.append("g"). attr("id", "annotations");
+    let chartArea = barchart.append("g").attr("id", "points")
+                                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     const requestData = async function () {
 
@@ -113,6 +126,10 @@
       const names = await d3.csv("world-country-names.csv");
       const world = await d3.json('https://unpkg.com/world-atlas@1.1.4/world/110m.json');
 
+      const percentScale =  d3.scaleLinear().domain([0,100]).range([chartHeight,0]);
+      var country_sales = ["North America", "European Union", "Japan", "Global"];
+      const countries = d3.map(sales, d => country_sales);
+      console.log(countries);
       var projection = d3.geoNaturalEarth1()
         .center([0, 15])
         .rotate([-9, 0])
@@ -155,8 +172,6 @@
       var divergentScale = [
         "rgb(222, 222, 222)", "rgb(124, 159, 224)", "rgb(4, 12, 80)"]
 
-
-
       const colorScale = d3.scaleQuantile()
         .domain(count)
         .range(divergentScale)
@@ -186,9 +201,7 @@
         return res
       }
 
-
-
-      //TODO:Modify this to only display the devlopers that match country chosen
+      //TODO:Modify this to only display the developers that match country chosen
       dev.forEach(d => {
         developers.append('li')
           .append('span')
@@ -216,7 +229,9 @@
                   .style('margin-left', 5)
 
                 //TODO:add an on click feature to show the barcharts of game sales
+                  .on("click", function () {
 
+                  })
               })
             }
 
