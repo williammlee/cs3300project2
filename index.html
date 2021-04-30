@@ -4,7 +4,7 @@
   <script src="https://d3js.org/d3.v6.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <style>
-    .container{
+    .container {
       display: flex;
     }
 
@@ -18,26 +18,25 @@
 
     .barchart {
       position: center;
-      
+
     }
 
-    .scatterchart{
+    .scatterchart {
       padding-top: 10px;
     }
 
     text {
-      font-family:'Verdana';
+      font-family: 'Verdana';
     }
-
   </style>
 </head>
 
 <body>
   <p>
-  
+
   <div class='container'>
     <div>
-      <svg id='donutChart' height = "500" width = "500" style="margin:50px"></svg>
+      <svg id='donutChart' height="500" width="500" style="margin:50px"></svg>
     </div>
     <div>
       <svg id='barchart' class='barchart' height="700" width="900"></svg>
@@ -48,18 +47,18 @@
   <div>
     <svg id="scatterchart" class="scatterchart" height="600" width="800"></svg>
   </div>
-  
-  
+
+
   <script>
     // Donut Properties
     const donutsvg = d3.select("#donutChart");
     const donutwidth = donutsvg.attr("width");
     const donutheight = donutsvg.attr("height");
-    const donutmargin = { top: 50, right: 20, bottom: 20, left:50};
+    const donutmargin = { top: 50, right: 20, bottom: 20, left: 50 };
     const donutWidth = donutwidth - donutmargin.left - donutmargin.right;
     const donutHeight = donutheight - donutmargin.top - donutmargin.bottom;
     const donutChart = donutsvg.append("g")
-                        .attr("transform","translate("+donutmargin.left+","+donutmargin.top+")");
+      .attr("transform", "translate(" + donutmargin.left + "," + donutmargin.top + ")");
 
     // scatterchart Properties
     const svgscatter = d3.select("svg#scatterchart");
@@ -70,8 +69,8 @@
     const scatterChartHeight = heightscatter - (marginscatter.top + marginscatter.bottom);
     let labelscatterchart = svgscatter.append("g").attr("id", "scatterAnnotations");
     let graphscatterchart = svgscatter.append("g")
-                              .attr("id", "graphscatterchartArea")
-                              .attr("transform", "translate(" + marginscatter.left + "," + marginscatter.top + ")");
+      .attr("id", "graphscatterchartArea")
+      .attr("transform", "translate(" + marginscatter.left + "," + marginscatter.top + ")");
 
     // barchart
     const barchart = d3.select('#barchart')
@@ -81,27 +80,27 @@
     const chartWidth = barWidth - barMargins.left - barMargins.right;
     const chartHeight = barHeight - barMargins.top - barMargins.bottom;
     let chartArea = barchart.append("g")
-        .attr("transform", "translate(" + barMargins.left + "," + barMargins.top + ")");
+      .attr("transform", "translate(" + barMargins.left + "," + barMargins.top + ")");
 
 
     const requestData = async function () {
 
       const ratings = await d3.csv("user_ratings.csv");
       let sales = await d3.csv("vg_sales.csv");
-     
+
       //Donut chart setup
-      var genreData = [{genre: 'Action', measure: 1423}, 
-                      {genre: 'Sports', measure: 1081},
-                      {genre: 'Misc', measure: 711},
-                      {genre: 'Role-Playing', measure: 635},
-                      {genre: 'Racing', measure: 578},
-                      {genre: 'Shooter', measure: 521},
-                      {genre: 'Platform', measure: 479},
-                      {genre: 'Adventure', measure: 433},
-                      {genre: 'Simulation', measure: 383}, 
-                      {genre: 'Fighting', measure: 377},
-                      {genre: 'Puzzle', measure: 242},                                                                                                    
-                      {genre: 'Strategy', measure: 224}];
+      var genreData = [{ genre: 'Action', measure: 1423 },
+      { genre: 'Sports', measure: 1081 },
+      { genre: 'Misc', measure: 711 },
+      { genre: 'Role-Playing', measure: 635 },
+      { genre: 'Racing', measure: 578 },
+      { genre: 'Shooter', measure: 521 },
+      { genre: 'Platform', measure: 479 },
+      { genre: 'Adventure', measure: 433 },
+      { genre: 'Simulation', measure: 383 },
+      { genre: 'Fighting', measure: 377 },
+      { genre: 'Puzzle', measure: 242 },
+      { genre: 'Strategy', measure: 224 }];
 
       var outerRadius = Math.min(donutwidth, donutheight) / 2;
       var innerRadius = outerRadius * 0.5;
@@ -110,49 +109,66 @@
       //var innerRadiusFinal = outerRadius * 0.45;
       //const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
       var colorScale = d3.scaleOrdinal().domain(genreData)
-                                        .range(["#800080", "#6495ED", "#DE3163", "#FF7F50", "#008080", "#FFAA33",
-                                            "#0BDA51", "#FF00FF", "#0437F2", "#D2042D", "#191970", "#228B22"]);
+        .range(["#800080", "#6495ED", "#DE3163", "#FF7F50", "#008080", "#FFAA33",
+          "#0BDA51", "#FF00FF", "#0437F2", "#D2042D", "#191970", "#228B22"]);
 
       donutChart.data([genreData])
-                .attr("width", donutwidth)
-                .attr("height", donutheight)
-                .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+        .attr("width", donutwidth)
+        .attr("height", donutheight)
+        .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
 
       var arc = d3.arc()
-              .outerRadius(outerRadius)
-              .innerRadius(innerRadius);
+        .outerRadius(outerRadius)
+        .innerRadius(innerRadius);
 
       //for mouseover when radius shifts 
       var arcAdjusted = d3.arc()
-                          .outerRadius(outerRadius)
-                          .innerRadius(innerRadiusAdjusted);
+        .outerRadius(outerRadius)
+        .innerRadius(innerRadiusAdjusted);
 
       var donut = d3.pie()
-                    .value(function(d) { return d.measure;});
+        .value(function (d) { return d.measure; });
 
       var arcs = donutChart.selectAll("g.slice")
-                            .data(donut)
-                            .enter()
-                              .append("g")
-                              .attr("class", "slice")
-                              .on("mouseover", mouseover)
-                              .on("mouseout", mouseout)
-                              .on("click", d => {
-                                let thisgenre = d.toElement.id;
-                                d3.selectAll('#scatterchart circle').each(function(){
-                                  let element = d3.select(this);
-                                  if (element.attr('genre')!== thisgenre){
-                                    element.attr('opacity', 0.15);
-                                  } else {
-                                    element.attr('opacity', 1);
-                                  }
-                                });
-                                
-                              });
+        .data(donut)
+        .enter()
+        .append("g")
+        .attr("class", "slice")
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout)
+        .on("click", d => {
+          let thisgenre = d.toElement.id;
+          d3.selectAll('#scatterchart circle').each(function () {
+            let element = d3.select(this);
+            if (element.attr('genre') !== thisgenre) {
+              element.attr('opacity', 0.15);
+            } else {
+              element.attr('opacity', 1);
+            }
+          });
+          // Preprocess for barchart
+          let xbox = sales.filter(x => x['Platform'] == 'XB' && x['Genre'] == thisgenre).slice(0, 3).sort(function (a, b) {
+            return b.rank - a.rank;
+          })
+          let ps3 = sales.filter(x => x['Platform'] == 'PS3' && x['Genre'] == thisgenre).slice(0, 3).sort(function (a, b) {
+            return b.rank - a.rank;
+          })
+          let wii = sales.filter(x => x['Platform'] == 'Wii' && x['Genre'] == thisgenre).slice(0, 3).sort(function (a, b) {
+            return b.rank - a.rank;
+          })
+
+
+
+          // barchart
+          const bardata = xbox.concat(ps3, wii);
+
+          barchart.selectAll('*').remove()
+          generateBar(bardata)
+        });
 
       arcs.append("path")
-          .attr("fill", function(d,i) {return colorScale(genreData[i]['genre']);})
-          .attr("d", arc);
+        .attr("fill", function (d, i) { return colorScale(genreData[i]['genre']); })
+        .attr("d", arc);
 
       d3.selectAll("g.slice").selectAll("path").transition()
         .duration(700)
@@ -161,213 +177,217 @@
         .attr('id', d => d.data.genre);
 
       arcs.append("text")
-          .text(function(d) {return d.data.genre;})
-          .attr("dy", ".35em")
-          .attr("text-anchor", "middle")
-          .attr("transform", function(d) {return "translate(" + arcAdjusted.centroid(d) + ")rotate(" + angle(d) + ")";})
-          .attr("font-size", "16px")
-          .attr("fill", "white");
+        .text(function (d) { return d.data.genre; })
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .attr("transform", function (d) { return "translate(" + arcAdjusted.centroid(d) + ")rotate(" + angle(d) + ")"; })
+        .attr("font-size", "16px")
+        .attr("fill", "white");
 
       donutChart.append("text").attr("class", "title")
-                .text("Video Game Genres")
-                .attr("dy", ".35em")
-                .attr("text-anchor", "middle")
-                .attr("font-size", "20px");
+        .text("Video Game Genres")
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "20px");
 
       function mouseover() {
-          d3.select(this)
-            .select("path")
-            .transition()
-            .duration(700)
-            .attr("d", arcAdjusted);
+        d3.select(this)
+          .select("path")
+          .transition()
+          .duration(700)
+          .attr("d", arcAdjusted);
       }
 
       function mouseout() {
-          d3.select(this)
-            .select("path")
-            .transition()
-            .duration(700)
-            .attr("d", arc);
+        d3.select(this)
+          .select("path")
+          .transition()
+          .duration(700)
+          .attr("d", arc);
       }
 
 
       function angle(d) {
-          var a =  (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
-          if (a > 90) {
-              return a - 180
-          } else {
-              return a
-          };
+        var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
+        if (a > 90) {
+          return a - 180
+        } else {
+          return a
+        };
       }
 
       // Preprocess Ratings
       let ratingLookup = {}
-      ratings.forEach(rating =>{
+      ratings.forEach(rating => {
         ratingLookup[rating.name] = parseInt(rating.metascore)
       })
-      
+
       //Adding ratings from ratings to sales
-      sales.forEach( game => {
+      sales.forEach(game => {
         game.Rating = ratingLookup[game.Name]
-        
+
       })
 
       //Overwrite sales with games with available ratings
       sales = sales.filter(d => d.Rating !== undefined)
       console.log(sales)
-      
-      // Preprocess for barchart
-      let xbox = ratings.filter(x => x['console'] == 'XBOX').slice(0, 3).sort(function (a, b) {
-          return b.metascore - a.metascore;
-        })
-      let ps3 = ratings.filter(x => x['console'] == 'PS3').slice(0, 3).sort(function (a, b) {
-        return b.metascore - a.metascore;
-        })
-      let wii = ratings.filter(x => x['console'] == 'WII').slice(0, 3).sort(function (a, b) {
-        return b.metascore - a.metascore;
-        })
-      
-      // barchart
-      const bardata = xbox.concat(ps3, wii);
 
-      const scoreScale = d3.scaleLinear()
-          .domain([0, 100])
+
+
+      function generateBar(bardata) {
+
+
+        let maxSale = 0
+        bardata.forEach(d => {
+          if (maxSale < parseFloat(d.Global_Sales)) {
+            console.log(maxSale, parseFloat(d.Global_Sales))
+            maxSale = parseFloat(d.Global_Sales);
+          }
+        })
+
+        // console.log(maxSale)
+
+        const scoreScale = d3.scaleLinear()
+          .domain([0, maxSale])
           .range([0, chartWidth - 400]);
 
-      const names = d3.map(bardata, d => d.name);
+        const names = d3.map(bardata, d => d.Name);
 
-      const nameScale = d3.scaleBand()
-        .range([0, chartHeight- 200])
-        .domain(names)
-        .padding(.1);
+        const nameScale = d3.scaleBand()
+          .range([0, chartHeight - 200])
+          .domain(names)
+          .padding(.1);
 
-      let leftAxis = d3.axisLeft(nameScale);
+        let leftAxis = d3.axisLeft(nameScale);
 
-      barchart.append("g")
-        .attr("class", "y axis")
-        .attr("transform", `translate(200, 20)`)
-        .call(leftAxis);
+        barchart.append("g")
+          .attr("class", "y axis")
+          .attr("transform", `translate(200, 20)`)
+          .call(leftAxis);
 
-      let bottomAxis = d3.axisBottom(scoreScale);
-      barchart.append("g")
-        .attr("class", "x axis")
-        .attr("transform", `translate(200, 480)`)
-        .call(bottomAxis);
-
-
-      barchart.selectAll("myRect")
-        .data(bardata)
-        .enter()
-        .append("rect")
-        .attr("x", scoreScale(0) + 200)
-        // .attr("x", 300)
-        .attr("y", d => nameScale(d.name) + 30)
-        // .attr("y", 300)
-        .attr("width", 0)
-        // .attr("width", 300)
-        .attr("height", d => 24)
-        .attr("fill", d => colorfill(d.console));
+        let bottomAxis = d3.axisBottom(scoreScale);
+        barchart.append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(200, 480)`)
+          .call(bottomAxis);
 
 
-      function colorfill(console) {
-        if (console == 'XBOX') {
-          return "#02475e";
-        }
-        else if (console == 'PS3') {
-          return "#687980";
-        }
-        else{
-          return "#f3bda1"; 
-        }   
-      };
-      // barchart legend 
-      barchart.append('circle')
-              .attr('cx', chartWidth- 100 )
-              .attr('cy', 100)
-              .attr('r', 10)
-              .attr('fill', colorfill('XBOX'))
-              .text("XBOX")
+        barchart.selectAll("myRect")
+          .data(bardata)
+          .enter()
+          .append("rect")
+          .attr("x", scoreScale(0) + 200)
+          .attr("y", d => nameScale(d.Name) + 30)
+          .attr("width", d => scoreScale(parseFloat(d.Global_Sales)))
+          .attr("height", d => 24)
+          .attr("fill", d => colorfill(d.Platform));
 
-      barchart.append('text')
-              .attr('x', chartWidth-85)
-              .attr('y', 106)
-              .text('XBOX')
 
-      barchart.append('circle')
-              .attr('cx', chartWidth-100 )
-              .attr('cy', 130)
-              .attr('r', 10)
-              .attr('fill', colorfill('PS3'))
-              .text("XBOX")
 
-      barchart.append('text')
-              .attr('x', chartWidth-85)
-              .attr('y', 136)
-              .text('PS3')
+        function colorfill(platform) {
+          if (platform == 'XB') {
+            return "#02475e";
+          }
+          else if (platform == 'PS3') {
+            return "#687980";
+          }
+          else {
+            return "#f3bda1";
+          }
+        };
 
-      barchart.append('circle')
-              .attr('cx', chartWidth-100 )
-              .attr('cy', 160)
-              .attr('r', 10)
-              .attr('fill', colorfill('WII'))
-              .text("XBOX")
+        // barchart legend 
+        barchart.append('circle')
+          .attr('cx', chartWidth - 100)
+          .attr('cy', 100)
+          .attr('r', 10)
+          .attr('fill', colorfill('XB'))
+          .text("XBOX")
 
-      barchart.append('text')
-              .attr('x', chartWidth-85)
-              .attr('y', 166)
-              .text('WII')
+        barchart.append('text')
+          .attr('x', chartWidth - 85)
+          .attr('y', 106)
+          .text('XBOX')
 
-      //barchart animation
-      barchart.selectAll("rect")
-              .transition()
-              .duration(800)
-              .attr("width",  d => scoreScale(d.metascore))
-              .delay((d,i) => i*100)
+        barchart.append('circle')
+          .attr('cx', chartWidth - 100)
+          .attr('cy', 130)
+          .attr('r', 10)
+          .attr('fill', colorfill('PS3'))
+          .text("XBOX")
 
-      //barchart axis labels
+        barchart.append('text')
+          .attr('x', chartWidth - 85)
+          .attr('y', 136)
+          .text('PS3')
+
+        barchart.append('circle')
+          .attr('cx', chartWidth - 100)
+          .attr('cy', 160)
+          .attr('r', 10)
+          .attr('fill', colorfill('Wii'))
+          .text("XBOX")
+
+
+        barchart.append('text')
+          .attr('x', chartWidth - 85)
+          .attr('y', 166)
+          .text('WII')
+
+
+        //barchart animation
+        barchart.selectAll("rect")
+          .transition()
+          .duration(800)
+          .attr("width", d => scoreScale(parseFloat(d.Global_Sales)))
+          .delay((d, i) => i * 100)
+
+
+        //barchart axis labels
+        barchart.append("text")
+          .attr("text-anchor", "end")
+          .attr("x", chartWidth / 2 + 60)
+          .attr("y", chartHeight - 130)
+          .text("Metacritic Rating")
+          .style('font-size', 18)
+          .style('font-weight', 700);
+      }
+
+
       barchart.append("text")
         .attr("text-anchor", "end")
-        .attr("x", chartWidth / 2 + 60)
-        .attr("y", chartHeight-130)
-        .text("Metacritic Rating")
-        .style('font-size', 18)
-        .style('font-weight', 700);
-
-
-      barchart.append("text")
-        .attr("text-anchor", "end")
-        .attr("x", -chartHeight/4)
+        .attr("x", -chartHeight / 4)
         .attr("y", 20)
         .attr("transform", "rotate(-90)")
         .text("Top 3 Most Popular Games")
         .style('font-size', 18)
         .style('font-weight', 700);
 
-    
 
 
-      
+
+
 
       //Scatter Plot Extent and Scales
 
       const ratingExtent = d3.extent(sales, d => d['Rating'])
       const ratingScale = d3.scaleLinear()
-                             .domain([ratingExtent[1],ratingExtent[0]])
-                             .range([scatterChartWidth,0])
+        .domain([ratingExtent[1], ratingExtent[0]])
+        .range([scatterChartWidth, 0])
 
       const salesExtent = d3.extent(sales, d => parseFloat(d['Global_Sales']));
       const salesScale = d3.scaleLog()
-                           .domain([salesExtent[1], salesExtent[0]])
-                           .range([10,scatterChartHeight]);
+        .domain([salesExtent[1], salesExtent[0]])
+        .range([10, scatterChartHeight]);
 
-      
+
 
       //Scatter Plot Y Axis 
       let salesAxis = d3.axisLeft(salesScale)
-                        .tickFormat(d3.format('.2f'));
+        .tickFormat(d3.format('.2f'));
       let salesGridLines = d3.axisLeft(salesScale)
-                             .tickSize(-scatterChartWidth - 10)
-                             .tickFormat("");
+        .tickSize(-scatterChartWidth - 10)
+        .tickFormat("");
 
       labelscatterchart.append("g")
         .attr("class", "y axis")
@@ -385,10 +405,10 @@
 
       let ratingAxis = d3.axisBottom(ratingScale);
       let ratingGridLines = d3.axisBottom(ratingScale)
-                              .tickSize(-scatterChartHeight - 10)
-                              .tickFormat("");
-                              
-      
+        .tickSize(-scatterChartHeight - 10)
+        .tickFormat("");
+
+
       labelscatterchart.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(" + marginscatter.left + ", " + (marginscatter.top + scatterChartHeight + 10) + ")")
@@ -400,18 +420,18 @@
 
       // Scatter Plot Circles
       graphscatterchart.selectAll("circle")
-                       .data(sales)
-                       .join("circle")
-                       .attr("id", d => d["Name"])
-                       .attr("genre", d => d["Genre"])
-                       .attr('r', 4)
-                       .attr('opacity', 0.7)
-                       .attr('cx', d => ratingScale(d['Rating']) )
-                       .attr('cy', d => salesScale(d['Global_Sales']) )
-                       .attr('fill', d => colorScale(d['Genre'])) //change this to circle graph color scale
+        .data(sales)
+        .join("circle")
+        .attr("id", d => d["Name"])
+        .attr("genre", d => d["Genre"])
+        .attr('r', 4)
+        .attr('opacity', 0.7)
+        .attr('cx', d => ratingScale(d['Rating']))
+        .attr('cy', d => salesScale(d['Global_Sales']))
+        .attr('fill', d => colorScale(d['Genre'])) //change this to circle graph color scale
 
-     // Scatter Plot Labels 
-     labelscatterchart.append("text")
+      // Scatter Plot Labels 
+      labelscatterchart.append("text")
         .attr("text-anchor", "end")
         .attr("x", widthscatter / 2 + 100)
         .attr("y", heightscatter - 7)
