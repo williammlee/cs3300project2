@@ -25,6 +25,9 @@
       padding-top: 10px;
     }
 
+    text {
+      font-family:'Verdana';
+    }
 
   </style>
 </head>
@@ -87,7 +90,7 @@
       let sales = await d3.csv("vg_sales.csv");
      
       //Donut chart setup
-      var genreData = [{genre: 'Action', measure: 1423},
+      var genreData = [{genre: 'Action', measure: 1423}, 
                       {genre: 'Sports', measure: 1081},
                       {genre: 'Misc', measure: 711},
                       {genre: 'Role-Playing', measure: 635},
@@ -95,9 +98,9 @@
                       {genre: 'Shooter', measure: 521},
                       {genre: 'Platform', measure: 479},
                       {genre: 'Adventure', measure: 433},
-                      {genre: 'Simulation', measure: 383},
+                      {genre: 'Simulation', measure: 383}, 
                       {genre: 'Fighting', measure: 377},
-                      {genre: 'Puzzle', measure: 242},
+                      {genre: 'Puzzle', measure: 242},                                                                                                    
                       {genre: 'Strategy', measure: 224}];
 
       var outerRadius = Math.min(donutwidth, donutheight) / 2;
@@ -105,10 +108,10 @@
       //for mouseover when radius shifts 
       var innerRadiusAdjusted = outerRadius * 0.4;
       //var innerRadiusFinal = outerRadius * 0.45;
-      // const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
+      //const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
       var colorScale = d3.scaleOrdinal().domain(genreData)
-                                              .range(["#CCCCFF", "#6495ED", "#DE3163", "#FF7F50", "#FFBF00", "#9FE2BF",
-                                            "#0BDA51", "#FFB6C1", "#FFE5B4", "#D2042D", "#191970", "#808000"]);
+                                        .range(["#800080", "#6495ED", "#DE3163", "#FF7F50", "#008080", "#FFAA33",
+                                            "#0BDA51", "#FF00FF", "#0437F2", "#D2042D", "#191970", "#228B22"]);
 
       donutChart.data([genreData])
                 .attr("width", donutwidth)
@@ -148,7 +151,7 @@
                               });
 
       arcs.append("path")
-          .attr("fill", function(d,i) {return colorScale(i);})
+          .attr("fill", function(d,i) {return colorScale(genreData[i]['genre']);})
           .attr("d", arc);
 
       d3.selectAll("g.slice").selectAll("path").transition()
