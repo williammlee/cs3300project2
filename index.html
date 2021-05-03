@@ -424,16 +424,16 @@
           .attr("x", chartWidth / 2 + 190)
           .attr("y", chartHeight - 130)
           .text("Global Sales in Millions ($)")
-          .style('font-size', 18)
+          .style('font-size', 10)
           .style('font-weight', 700);
 
         barchart.append("text")
           .attr("text-anchor", "end")
-          .attr("x", -chartHeight / 7)
-          .attr("y", 15)
+          .attr("x", -chartHeight / 7 + 20)
+          .attr("y", 10)
           .attr("transform", "rotate(-90)")
           .text("Top 3 Most Popular Games: " + genre)
-          .style('font-size', 18)
+          .style('font-size', 10)
           .style('font-weight', 700);
       }
 
