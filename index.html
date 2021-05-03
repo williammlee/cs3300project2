@@ -52,7 +52,15 @@
     .axis text{
       font-size: 7px;
     }
-
+    
+    .label1{
+      padding-left: 150px;
+      font-size: 20px;
+    }
+    .label2{
+      padding-left: 20px;
+      font-size: 20px;
+    }
   </style>
 </head>
 
@@ -62,6 +70,8 @@
 
   <div class = 'donutChart'>
     <svg id='donutChart' height="450" width="450"></svg>
+    <text class= 'label1'>Total Games: </text>
+    <text id="label" class='label2'>6865</text>
   </div>
 
   <div class='container'>
@@ -131,8 +141,6 @@
       var innerRadius = outerRadius * 0.5;
       //for mouseover when radius shifts 
       var innerRadiusAdjusted = outerRadius * 0.4;
-      //var innerRadiusFinal = outerRadius * 0.45;
-      //const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
       var colorScale = d3.scaleOrdinal().domain(genreData)
         .range(["#800080", "#6495ED", "#DE3163", "#FF7F50", "#008080", "#FFAA33",
           "#0BDA51", "#FF00FF", "#0437F2", "#D2042D", "#191970", "#228B22"]);
@@ -156,6 +164,24 @@
       var donut = d3.pie()
         .value(function (d) { return d.measure; });
 
+      //create number of games label
+      d3.select("#label")
+        .attr('x', 800)
+        .attr('y', 200)
+        .attr('text-anchor', 'end')
+        .attr('alignment-baseline', 'hanging')
+        .attr('font-weight', 'bold')
+        .raise();
+
+      // helper to get the amount of games 
+      function getMeasure(lst, genre){
+        for(i in lst){
+          if (lst[i]['genre'] === genre){
+            return lst[i]['measure']
+          }
+        }
+      }
+
       // alter arc and mouseover and click effects 
       var arcs = donutChart.selectAll("g.slice")
         .data(donut)
@@ -166,6 +192,9 @@
         .on("mouseout", mouseout)
         .on("click", d => {
           let thisgenre = d.toElement.id;
+          // change the total amount of games
+          d3.select("#label").text(getMeasure(genreData,thisgenre))
+
           d3.selectAll('#scatterchart circle').each(function () {
             let element = d3.select(this);
             if (element.attr('genre') !== thisgenre) {
@@ -210,7 +239,9 @@
         .attr("font-size", "8px")
         .attr("fill", "white");
 
-      donutChart.append("text").attr("class", "title")
+
+      donutChart.append("text")
+        .attr("class", "title")
         .text("Video Game Genres")
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
@@ -263,7 +294,6 @@
         let maxSale = 0
         bardata.forEach(d => {
           if (maxSale < parseFloat(d.Global_Sales)) {
-            console.log(maxSale, parseFloat(d.Global_Sales))
             maxSale = parseFloat(d.Global_Sales);
           }
       });
