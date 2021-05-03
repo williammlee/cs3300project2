@@ -125,7 +125,6 @@
       { genre: 'Adventure', measure: 433 },
       { genre: 'Simulation', measure: 383 },
       { genre: 'Fighting', measure: 377 },
-      { genre: 'Puzzle', measure: 242 },
       { genre: 'Strategy', measure: 224 }];
 
       var outerRadius = Math.min(donutwidth, donutheight) / 2;
@@ -143,6 +142,7 @@
         .attr("height", donutheight)
         .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
 
+      // arc creation of the donut chart
       var arc = d3.arc()
         .outerRadius(outerRadius)
         .innerRadius(innerRadius);
@@ -152,9 +152,11 @@
         .outerRadius(outerRadius)
         .innerRadius(innerRadiusAdjusted);
 
+      // create donut
       var donut = d3.pie()
         .value(function (d) { return d.measure; });
 
+      // alter arc and mouseover and click effects 
       var arcs = donutChart.selectAll("g.slice")
         .data(donut)
         .enter()
@@ -183,15 +185,13 @@
             return b.rank - a.rank;
           })
 
-
-
-          // barchart
+          // alter bar chart
           const bardata = xbox.concat(ps3, wii);
-
           barchart.selectAll('*').remove()
           generateBar(bardata)
         });
 
+      // customize the arcs 
       arcs.append("path")
         .attr("fill", function (d, i) { return colorScale(genreData[i]['genre']); })
         .attr("d", arc);
@@ -215,7 +215,8 @@
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .attr("font-size", "12px");
-
+      
+      // change effects for donut chart
       function mouseover() {
         d3.select(this)
           .select("path")
@@ -232,7 +233,7 @@
           .attr("d", arc);
       }
 
-
+      // helper to calculate arc expansion 
       function angle(d) {
         var a = (d.startAngle + d.endAngle) * 90 / Math.PI - 90;
         if (a > 90) {
@@ -256,128 +257,123 @@
 
       //Overwrite sales with games with available ratings
       sales = sales.filter(d => d.Rating !== undefined)
-      console.log(sales)
-
-
-
+    
+      // generate scales for barchart 
       function generateBar(bardata) {
-
-
         let maxSale = 0
         bardata.forEach(d => {
           if (maxSale < parseFloat(d.Global_Sales)) {
             console.log(maxSale, parseFloat(d.Global_Sales))
             maxSale = parseFloat(d.Global_Sales);
           }
-        })
+      });
 
-        // console.log(maxSale)
+      
+      const scoreScale = d3.scaleLinear()
+        .domain([0, maxSale])
+        .range([0, chartWidth - 400]);
 
-        const scoreScale = d3.scaleLinear()
-          .domain([0, maxSale])
-          .range([0, chartWidth - 400]);
+      const names = d3.map(bardata, d => d.Name);
 
-        const names = d3.map(bardata, d => d.Name);
+      const nameScale = d3.scaleBand()
+        .range([0, chartHeight - 200])
+        .domain(names)
+        .padding(.1);
 
-        const nameScale = d3.scaleBand()
-          .range([0, chartHeight - 200])
-          .domain(names)
-          .padding(.1);
+      let leftAxis = d3.axisLeft(nameScale);
 
-        let leftAxis = d3.axisLeft(nameScale);
+      barchart.append("g")
+        .attr("class", "y axis")
+        .attr("transform", `translate(220, 20)`)
+        .call(leftAxis);
 
-        barchart.append("g")
-          .attr("class", "y axis")
-          .attr("transform", `translate(220, 20)`)
-          .call(leftAxis);
-
-        let bottomAxis = d3.axisBottom(scoreScale);
-        barchart.append("g")
-          .attr("class", "x axis")
-          .attr("transform", `translate(220, 400)`)
-          .call(bottomAxis);
-
-
-        barchart.selectAll("myRect")
-          .data(bardata)
-          .enter()
-          .append("rect")
-          .attr("x", scoreScale(0) + 220)
-          .attr("y", d => nameScale(d.Name) + 30)
-          .attr("width", d => scoreScale(parseFloat(d.Global_Sales)))
-          .attr("height", d => 24)
-          .attr("fill", d => colorfill(d.Platform));
+      let bottomAxis = d3.axisBottom(scoreScale);
+      barchart.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(220, 400)`)
+        .call(bottomAxis);
 
 
-
-        function colorfill(platform) {
-          if (platform == 'XB') {
-            return "#02475e";
-          }
-          else if (platform == 'PS3') {
-            return "#687980";
-          }
-          else {
-            return "#f3bda1";
-          }
-        };
-
-        // barchart legend 
-        barchart.append('circle')
-          .attr('cx', chartWidth - 200)
-          .attr('cy', 60)
-          .attr('r', 7)
-          .attr('fill', colorfill('XB'))
-          .text("XBOX")
-
-        barchart.append('text')
-          .attr('x', chartWidth - 185)
-          .attr('y', 66)
-          .text('XBOX')
-
-        barchart.append('circle')
-          .attr('cx', chartWidth - 200)
-          .attr('cy', 80)
-          .attr('r', 7)
-          .attr('fill', colorfill('PS3'))
-          .text("XBOX")
-
-        barchart.append('text')
-          .attr('x', chartWidth - 185)
-          .attr('y', 86)
-          .text('PS3')
-
-        barchart.append('circle')
-          .attr('cx', chartWidth - 200)
-          .attr('cy', 100)
-          .attr('r', 7)
-          .attr('fill', colorfill('Wii'))
-          .text("XBOX")
+      barchart.selectAll("myRect")
+        .data(bardata)
+        .enter()
+        .append("rect")
+        .attr("x", scoreScale(0) + 220)
+        .attr("y", d => nameScale(d.Name) + 30)
+        .attr("width", d => scoreScale(parseFloat(d.Global_Sales)))
+        .attr("height", d => 24)
+        .attr("fill", d => colorfill(d.Platform));
 
 
-        barchart.append('text')
-          .attr('x', chartWidth - 185)
-          .attr('y', 106)
-          .text('WII')
+      // helper function to fill in bar chart colors
+      function colorfill(platform) {
+        if (platform == 'XB') {
+          return "#02475e";
+        }
+        else if (platform == 'PS3') {
+          return "#687980";
+        }
+        else {
+          return "#f3bda1";
+        }
+      };
+
+      // barchart legend 
+      barchart.append('circle')
+        .attr('cx', chartWidth - 200)
+        .attr('cy', 60)
+        .attr('r', 7)
+        .attr('fill', colorfill('XB'))
+        .text("XBOX")
+
+      barchart.append('text')
+        .attr('x', chartWidth - 185)
+        .attr('y', 66)
+        .text('XBOX')
+
+      barchart.append('circle')
+        .attr('cx', chartWidth - 200)
+        .attr('cy', 80)
+        .attr('r', 7)
+        .attr('fill', colorfill('PS3'))
+        .text("XBOX")
+
+      barchart.append('text')
+        .attr('x', chartWidth - 185)
+        .attr('y', 86)
+        .text('PS3')
+
+      barchart.append('circle')
+        .attr('cx', chartWidth - 200)
+        .attr('cy', 100)
+        .attr('r', 7)
+        .attr('fill', colorfill('Wii'))
+        .text("XBOX")
 
 
-        //barchart animation
-        barchart.selectAll("rect")
-          .transition()
-          .duration(800)
-          .attr("width", d => scoreScale(parseFloat(d.Global_Sales)))
-          .delay((d, i) => i * 100)
+      barchart.append('text')
+        .attr('x', chartWidth - 185)
+        .attr('y', 106)
+        .text('WII')
 
 
-        //barchart axis labels
-        barchart.append("text")
-          .attr("text-anchor", "end")
-          .attr("x", chartWidth / 2 + 150)
-          .attr("y", chartHeight - 130)
-          .text("Metacritic Rating")
-          .style('font-size', 14)
-          .style('font-weight', 500);
-      }
+      //barchart animation
+      barchart.selectAll("rect")
+        .transition()
+        .duration(800)
+        .attr("width", d => scoreScale(parseFloat(d.Global_Sales)))
+        .delay((d, i) => i * 100)
+
+
+      //barchart axis labels
+      barchart.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", chartWidth / 2 + 150)
+        .attr("y", chartHeight - 130)
+        .text("Metacritic Rating")
+        .style('font-size', 14)
+        .style('font-weight', 500);
+    }
 
 
       barchart.append("text")
@@ -429,7 +425,6 @@
       let ratingGridLines = d3.axisBottom(ratingScale)
         .tickSize(-scatterChartHeight - 10)
         .tickFormat("");
-
 
       labelscatterchart.append("g")
         .attr("class", "x axis")
