@@ -360,12 +360,6 @@
           .attr("height", d => 24)
           .attr("fill", d => colorfill(d.Platform));
 
-
-        // let bottomAxis = d3.axisBottom(scoreScale);
-        // barchart.append("g")
-        //   .attr("class", "x axis")
-        //   .attr("transform", `translate(220, 400)`)
-        //   .call(bottomAxis);
         function colorfill(platform) {
           if (platform == 'XB') {
             return "#02475e";
